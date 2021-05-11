@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <title>My Shopping List</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+    <link rel="stylesheet" style="text/css" href="../static/css/mystyle.css">
+
+</head>
+
+<body>
+    <h1> &#10022; Mama's Shopping List &#10022;</h1>
+    <div class="home">
+    <a class="btn btn-primary" href="{{url_for('controller_additem')}}">New Item</a>
+    <br>
+    <br>
+    <!-- NEED TO WORK ON THE LOGIC TO BRING RECORDS BASED ON CHECK BOX SHOW ALL OR SHOW OPEN-->
+    <div class="form-check form-switch">
+        <label class="form-check-label" for="flexSwitchCheckDefault">Show all items</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-check-input" type="checkbox" id="myListDisplay" value="1" onclick="myChoice()" checked>
+        <h4 id="listDisplay" style="color: blue"></h4>   
+        <h4 style="color:green" id="CheckboxStatus"></h4>
+
+    </div>
+    <script>
+        function myChoice() {
+            var myListDisplay = document.getElementById("myListDisplay");
+            var input, filter, found, table, tr, td, i, j;
+
+            if (myListDisplay.checked == true) {
+                filter = "";
+                document.getElementById("listDisplay").innerHTML = "Show all items including purchased";
+            }
+            else {
+                filter = "OPEN";
+                document.getElementById("listDisplay").innerHTML = "Show only open items";
+            }
+            table = document.getElementById("item_view");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td");
+                for (j = 0; j < td.length; j++) {
+                    if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                    }
+                }
+                if (found) {
+                    tr[i].style.display = "";
+                    found = false;
+                } else {
+                    if (i > 0) { tr[i].style.display = "none"; }
+                }
+            }
+        }
+
+
+    </script>
+ 
+    <!-- Loop thru all changed checkbox and update the isChecked flag in database table -->
+
+    <script type="text/javascript">
+        $(function () {
+            // General/modular function for status logging
+            var checkboxChecker = function () {
+                var myCheckboxValues = "";
+                
+                $('table tr').each(function (i) {
+                    // Only check rows that contain a checkbox
+                    var $chkbox = $(this).find('input[type="checkbox"]');
+                    //alert ('testing 123 ' + $chkbox.length);
+                    if ($chkbox.length) {
+                        var status = $chkbox.prop('checked');
+                        var tab = document.getElementById("item_view");
+                        var row = tab.rows[i];
+                        var cols = row.getElementsByTagName("td");
+                        console.log('Table row ' + i + ' contains a checkbox with a checked status of: ' + status);
+
+
+                        if (status == true) {
+                            myCheckboxValues = myCheckboxValues + " [" + cols[2].childNodes[0].nodeValue + "] ";
+                            //cols[1].childNodes[0].nodeValue = "Purchased";
+                            //document.getElementById('lblCheckbox').innerHTML = "Purchased";
+                        }
+                        else if (status == false) {
+                            //cols[1].childNodes[0].nodeValue = "Open";
+                            myCheckboxValues = myCheckboxValues + " [" + cols[2].childNodes[0].nodeValue + "] ";
+                            //document.getElementById('lblCheckbox').innerHTML = "Open";
+                        }
+                        var url = "http://127.0.0.1:5000/itemdone/" + cols[2].childNodes[0].nodeValue;
+                        // update that task is completed
+                        fetch(url, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                isChecked: status
+                            }),
+                            headers: {
+                                "Content-type": "application/json; charset=UTF-8"
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(json => console.log(json))
+
+                        //}
+                    }
+                });
+                // print in this field for checking the values
+                //document.getElementById("CheckboxStatus").innerHTML = "Purchased: " + myCheckboxValues;
+
+            };
+
+            // Check checkboxes status on DOMready
+            checkboxChecker();
+
+            // Check again when checkboxes states are changed
+            $('table tr input[type="checkbox"]').on('change', function () {
+                checkboxChecker();
+            });
+        });
+    </script>
+
+    <div class="viewTable">
+
+        <table id="item_view" class=" table table-striped">
+
+            <thead class="thead-light">
+                <tr>
+                    <th style='font-size:20px;'> &#10004; </th>
+                    <th> Date Added</th>
+                    <th style="display:none;"> Item Id</th>
+                    <th> Item </th>
+                    <th> Category</th>
+                    <th> Qty </th>
+                    <th> Qty Type </th>
+                    <th> Store </th>
+                    <th> Order Type</th>
+                    <th> Needed By <br>[YYYY-MM-DD] </th>
+                    <th> Comments </th>
+                    <th> Edit or Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for item in viewList %}
+                {% if item['isChecked'] >= 0%}
+                <!-- <var>MyChoice</var> -->
+                <tr id="row">
+                    <!-- add ID checkbox td -->
+                    <td>
+
+                        <span>
+                            <h2><input type="checkbox" {% if item['isChecked']==1 %} checked {% endif %}
+                                    class="homepageCheckbox" id="myCheck"> </h2>
+                                    <label style="display:none;" id="lblCheckbox" for="myCheck">
+                                        {% if item['isChecked']==1 %} 2 {% elif item['isChecked']==0 %} 1 {% endif %}
+                                    </label>
+                    </td>
+                    <td>
+
+                    {{ item['create_date']}}
+                    </td>
+                    <td style="display:none;">{{ item['item_id'] }}</td>
+                    <td>{{ item['item_name'] }} </td>
+                    <td>{{ item['item_catg'] }}</td>
+                    <td>{{ item['item_qty'] }}</td>
+                    <td>{{ item['qty_type'] }}</td>
+                    <td>{{ item['store'] }}</td>
+                    <td>{{ item['order_type'] }}</td>
+                    <td>{{ item['needed_by'] }}</td>
+                    <td>{{ item['comment'] }}</td>
+                    <td><a class="nav-link"
+                            href="{{ url_for('controller_edititem', item_id=item['item_id'] ) }}">Edit/Delete</a>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+
+        </table>
+
+    </div>
+    <!-- change the default number frequency in dropdown, manke search case insensitive -->
+    <script>
+        $('#item_view').dataTable({
+            "search": {
+            "caseInsensitive": true
+            },
+            "lengthMenu": [5, 10, 25, 50, 100]            
+        });
+    </script>
+    </div>
+</body>
+
+</html>

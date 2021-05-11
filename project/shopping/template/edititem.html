@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <title>Edit Item : {{edititem['item_id']}}   </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static',filename='css/mystyle.css') }}">
+</head>
+
+<body>
+    
+    <h1>&#10022;Edit Item&#10022;</h1>
+    {% if error_msg %}
+        <p><b>Error saving your entry: {{ error_msg }}</b> </p>
+    {% endif %} 
+    <div class="container" id="container">
+    <form method="post">
+        <!--- item_id kept hidden --->
+        <input id="item_id" name="item_id" type="hidden" value="{{edititem['item_id']}}">
+    
+        <div class="form-group">
+            <label for="date_added"class="col-sm-2 col-form-label"><strong>Date added:</label></strong>
+            <input class="span2" type="date" name="date_added" placeholder="Today's Date" class="form-control"
+            value="{{ request.form['date_added'] or edititem.create_date }}"></input>
+
+            <div class="form-group">
+                <label for="item_name" class="col-sm-2 col-form-label"><strong>Enter item:</strong></label>
+                <input type="text" name="item_name" placeholder="Item" value="{{ request.form['item_name'] or edititem.item_name }}">
+                </input>
+            </div>
+
+            <div class="form-group">
+                <label for="item_catg" class="col-sm-2 col-form-label"><strong>Item Category:</strong></label>
+
+                <select name="item_catg" id="category">
+                    <option value="fruits"{% if edititem.item_catg == "fruits" %} selected {% endif %}>Fruits</option>
+                    <option value="vegetables"{% if edititem.item_catg == "vegetables" %} selected {% endif %}>Vegetables</option>
+                    <option value="meats"{% if edititem.item_catg == "meats" %} selected {% endif %}>Meats</option>
+                    <option value="frozen food"{% if edititem.item_catg == "frozen food" %} selected {% endif %}>Frozen Foods</option>
+                    <option value="beverage"{% if edititem.item_catg == "beverage" %} selected {% endif %}>Beverages</option>
+                    <option value="bakery"{% if edititem.item_catg == "bakery" %} selected {% endif %}>Bakery Item</option>
+                    <option value="dairy"{% if edititem.item_catg == "dairy" %} selected {% endif %}>Dairy Product</option>
+                    <option value="other"{% if edititem.item_catg == "other" %} selected {% endif %}>Other</option>
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="item_qty" class="col-sm-2 col-form-label"><strong>Quantity:</strong></label>
+                <input type="text" name="item_qty" placeholder="Enter a number" value="{{ request.form['item_qty'] or edititem['item_qty'] }}">
+                </input>
+            </div>
+
+            <div class="form-group">
+                <label for="qty_type" class="col-sm-2 col-form-label"><strong>Quantity Type:</strong></label>
+
+                <select name="qty_type" id="qty type">
+                    <option value="bags"{% if edititem.qty_type == "bags" %} selected {% endif %}>bags</option>
+                    <option value="lbs"{% if edititem.qty_type == "lbs" %} selected {% endif %}>lbs</option>
+                    <option value="kgs"{% if edititem.qty_type == "kgs" %} selected {% endif %}>kgs</option>
+                    <option value="grams"{% if edititem.qty_type == "grans" %} selected {% endif %}>grams</option>
+                    <option value="pieces"{% if edititem.qty_type == "pieces" %} selected {% endif %}>pieces</option>
+                    <option value="boxes"{% if edititem.qty_type == "boxes" %} selected {% endif %}>boxes</option>
+                    <option value="boxes"{% if edititem.qty_type == "boxes" %} selected {% endif %}>bottles</option>
+                    <option value="other"{% if edititem.qty_type == "other" %} selected {% endif %}>other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="store" class="col-sm-2 col-form-label"><strong>Choose a store:</strong></label>
+
+                <select name="store" id="stores">
+                    <option value="walmart"{% if edititem.store == "walmart" %} selected {% endif %}>Walmart</option>
+                    <option value="publix" {% if edititem.store == "publix" %} selected {% endif %}>Publix</option>
+                    <option value="target"{% if edititem.store == "target" %} selected {% endif %}>Target</option>
+                    <option value="costco" {% if edititem.store == "costco" %} selected {% endif %}>Costco</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="neededby" class="col-sm-2 col-form-label"><strong>Needed By:</strong></label>
+                <input class="span2" type="date" name="needed_by" placeholder="Choose a date:" class="form-control"
+                value="{{ request.form['needed_by'] or edititem['needed_by'] }}"></input>
+            </div>
+                <div class="form-group">
+                    <label for="order_type_radio"><strong> Order Type: </label></strong>
+                    <br />
+                    <input type="radio" name="order_type" id="In-store" value="In-store" {% if edititem.order_type == "In-store" %} checked {% endif %}><label for="In-store">In-store</label><br>
+                    <input type="radio" name="order_type" id="Curbside Pickup" value="Curbside Pickup" {% if edititem.order_type == "Curbside Pickup" %} checked {% endif %}><label for="Curbside Pickup">Curbside Pickup</label><br>
+                    <input type="radio" name="order_type" id="Delivery" value="Delivery" {% if edititem.order_type == "Delivery" %} checked {% endif %}><label for="Delivery">Delivery</label>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group" class="col-sm-2 col-form-label"><strong>Comment:</strong>
+                        <br>
+                    <textarea name="comment" placeholder="Add a comment:" >{{ request.form['comment'] or edititem['comment'] }}</textarea>
+                </div>
+
+
+           
+        
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a class="btn btn-primary" href="{{url_for('controller_viewitem')}}">Cancel</a>
+                </div>
+                        
+
+    </form>
+    <form action="{{ url_for('controller_deleteitem', item_id=edititem['item_id'] ) }}" method = "post">
+    <!-- <form action="{{ url_for('controller_deleteitem', item_id=edititem['item_id'] ) }}" method = "post"> -->
+
+        <input type="submit" value = "Delete" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">
+    </form>
+
+</html>
